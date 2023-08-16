@@ -12,6 +12,30 @@ export class App extends Component {
     
   }
 
+  componentDidMount(){
+    const saveContacts = localStorage.getItem('save-contacts');
+    if (saveContacts !== null){
+      try {
+        this.setState({
+          contacts: JSON.parse(saveContacts)
+        });
+      } catch (error) {
+        console.error('Ошибка при чтении контактов из localStorage:', error);
+      }
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if(prevState.contacts !== this.state.contacts) {
+      
+      try{
+        localStorage.setItem('save-contacts', JSON.stringify(this.state.contacts))
+      }catch(error) {
+        console.error("OPPPS! Помилка при збереженні данних в LocalStorage", error)
+      }
+    }
+  }
+
   changeFilter = newName => {
   this.setState({filter: newName})
   }
@@ -29,7 +53,9 @@ export class App extends Component {
   deleteContacts =id => {
     this.setState(prevState => ({
       contacts: prevState.contacts.filter(contact => contact.id !== id)
-    }))
+    }), () => {
+      localStorage.setItem('saved-contacts', JSON.stringify(this.state.contacts));
+    });
   }
   render(){
    const {filter, contacts} = this.state;
